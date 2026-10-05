@@ -1,0 +1,11 @@
+{
+  "name": "kit-sink",
+  "version": "0.1.0",
+  "description": "cc-kit kitchen sink: every candidate component on one pane, to judge and pick from",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Eduardo Cruz",
+    "url": "https://eduardocruz.com"
+  },
+  "license": "MIT"
+}
