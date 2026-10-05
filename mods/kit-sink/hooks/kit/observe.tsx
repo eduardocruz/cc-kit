@@ -125,10 +125,11 @@ export function ContextMap(
   p: { categories: { name: string; tokens: number }[]; window: number; width: number },
 ) {
   const { Box, Text } = el
-  const used = p.categories.reduce((sum, c) => sum + c.tokens, 0)
+  const categories = p.categories.filter(c => !/free space/i.test(c.name))
+  const used = categories.filter(c => !isReserve(c.name)).reduce((sum, c) => sum + c.tokens, 0)
   const cells = Math.max(10, p.width)
   let placed = 0
-  const segments = p.categories.map((c, i) => {
+  const segments = categories.map((c, i) => {
     const target = Math.round(((placed + c.tokens) / p.window) * cells)
     const from = Math.round((placed / p.window) * cells)
     placed += c.tokens
@@ -148,7 +149,7 @@ export function ContextMap(
         {fmtTokens(used)} of {fmtTokens(p.window)} · {pct(used / p.window)} used
       </Text>
       <Box flexWrap="wrap" columnGap={2}>
-        {p.categories.map((c, i) => (
+        {categories.map((c, i) => (
           <Box>
             <Text color={series[i % series.length]}>■ </Text>
             <Text>
@@ -160,6 +161,9 @@ export function ContextMap(
     </Box>
   )
 }
+
+/** Free space and the autocompact buffer are room, not content. */
+const isReserve = (name: string) => /free space|autocompact/i.test(name)
 
 export type FileTouch = { path: string; reads: number; edits: number }
 

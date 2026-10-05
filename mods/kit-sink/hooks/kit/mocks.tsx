@@ -91,12 +91,12 @@ export function CommitComposer(el: El, p: { act: Act }) {
   return (
     <Box flexDirection="column">
       <Text>
-        <Text color={tone.ok}>☑</Text> app/Services/InvoiceService.php
+        <Text color={tone.ok}>✓</Text> app/Services/InvoiceService.php
       </Text>
       <Text>
-        <Text color={tone.ok}>☑</Text> tests/Unit/InvoiceTest.php
+        <Text color={tone.ok}>✓</Text> tests/Unit/InvoiceTest.php
       </Text>
-      <Text dimColor>☐ CHANGELOG.md</Text>
+      <Text dimColor>○ CHANGELOG.md</Text>
       <Text>
         <Text dimColor>message › </Text>Exclude voided lines from invoice totals▌
       </Text>
@@ -147,7 +147,7 @@ export function TodoBoard(el: El, p: { width: number }) {
           dimColor={t.state === 'done'}
           strikethrough={t.state === 'done'}
         >
-          {t.state === 'done' ? '☑' : t.state === 'active' ? '◐' : '☐'} {t.text}
+          {t.state === 'done' ? '✓' : t.state === 'active' ? '◐' : '○'} {t.text}
         </Text>
       ))}
     </Box>
@@ -177,7 +177,7 @@ export function FormPane(el: El) {
   const fields: [string, string][] = [
     ['Project', 'cc-kit'],
     ['License', 'MIT ▾'],
-    ['Surfaces', '☑ terminal  ☑ desktop  ☐ mobile'],
+    ['Surfaces', '✓ terminal  ✓ desktop  ○ mobile'],
   ]
   return (
     <Box flexDirection="column">

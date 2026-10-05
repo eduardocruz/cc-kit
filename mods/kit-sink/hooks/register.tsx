@@ -6,6 +6,7 @@ import { groups, Specimen } from './kit/sections'
 
 const PANE = 'kit-sink'
 const SEEN_KEY = 'kit-sink.hinted'
+const GROUPS = ['all', 'data', 'observe', 'code', 'decide', 'skins', 'layout']
 
 const tab = atom({ plugin: 'kit-sink', key: 'tab' } as const, 'all')
 const calls = atom({ plugin: 'kit-sink', key: 'calls' } as const, [])
@@ -25,7 +26,7 @@ export const register: Register = on => {
     await $.command.register({
       name: 'kit',
       description: 'cc-kit: `/kit sink` opens the kitchen sink of every candidate component',
-      argumentHint: 'sink',
+      argumentHint: 'sink [all|data|observe|code|decide|skins|layout]',
     })
 
     // The Pane never opens unasked (it would wait below 144 columns); hint once instead.
@@ -38,9 +39,11 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'kit' }, async ($, e) => {
-    const sub = e.args.trim() || 'sink'
+    const [sub = 'sink', group] = e.args.trim().split(/\s+/).filter(Boolean)
     if (sub !== 'sink') return { text: `Unknown /kit command "${sub}". Try /kit sink.` }
+    if (group && !GROUPS.includes(group)) return { text: `Unknown group "${group}". One of: ${GROUPS.join(', ')}.` }
 
+    if (group) await update($, tab, () => group)
     await $.ui.open({ id: PANE, title: 'cc-kit · kitchen sink' })
 
     return { text: 'Kitchen sink opened.' }
@@ -73,7 +76,7 @@ export const register: Register = on => {
       window: u.context.window,
       usd: u.cost?.usd ?? 0,
       categories: (u.context.breakdown?.categories ?? [])
-        .filter(c => !c.isDeferred && c.tokens > 0)
+        .filter(c => !c.isDeferred && c.tokens > 0 && !/free space/i.test(c.name))
         .map(c => ({ name: c.name, tokens: c.tokens })),
     }
     await update($, usage, list => [...list, point].slice(-100))

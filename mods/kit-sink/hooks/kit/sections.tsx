@@ -15,6 +15,17 @@ export type Group = { id: string; title: string; items: Item[] }
 const wave = (n: number, seed: number) =>
   Array.from({ length: n }, (_, i) => Math.round(50 + 30 * Math.sin((i + seed) / 3) + ((i * 37 + seed * 11) % 17)))
 
+/** Weekday-heavy activity that grows over the weeks, with quiet weekends and a gap week. */
+const activity = (weeks: number) =>
+  Array.from({ length: weeks * 7 }, (_, i) => {
+    const week = Math.floor(i / 7)
+    const day = i % 7
+    if (week === 9) return 0
+    const base = day >= 5 ? 0.5 : 3
+    const jitter = (i * 37 + 11) % 5
+    return Math.max(0, Math.round(base + (week / weeks) * 5 + jitter - 2.5))
+  })
+
 const MOCK_AGENTS: AgentNode = {
   name: 'session',
   type: 'opus',
@@ -77,7 +88,16 @@ function touches(calls: SinkCall[]): FileTouch[] {
     else f.edits++
     by.set(call.target, f)
   }
-  return [...by.values()]
+  return relativize([...by.values()])
+}
+
+/** Strips the directory every path shares, so rows show `app/x.php`, not `/Users/…/repo/app/x.php`. */
+function relativize(files: FileTouch[]): FileTouch[] {
+  if (files.length === 0) return files
+  const dirs = files.map(f => f.path.split('/').slice(0, -1))
+  let shared = 0
+  while (dirs.every(d => d[shared] !== undefined && d[shared] === dirs[0]?.[shared])) shared++
+  return files.map(f => ({ ...f, path: f.path.split('/').slice(shared).join('/') }))
 }
 
 function agentTree(calls: SinkCall[]): AgentNode | null {
@@ -148,7 +168,7 @@ export function groups(el: El, width: number, live: Live, act: Act): Group[] {
               format: n => `${n}×`,
             }),
         },
-        { name: 'Heatmap', status: 'v1', draw: () => Heatmap(el, { days: wave(7 * 26, 3).map(v => (v % 5 === 0 ? 0 : v)), width, label: 'sessions · last 26 weeks' }) },
+        { name: 'Heatmap', status: 'v1', draw: () => Heatmap(el, { days: activity(26), width, label: 'sessions · last 26 weeks' }) },
       ],
     },
     {
